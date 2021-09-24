@@ -1,14 +1,14 @@
-import  os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+import os
 
-import  tensorflow as tf
-import  numpy as np
-from    tensorflow import keras
-from    tensorflow.keras import layers
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+import tensorflow as tf
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras import layers
 
 tf.random.set_seed(22)
-np.random.seed(22) 
+np.random.seed(22)
 assert tf.__version__.startswith('2.')
 
 batchsz = 128
@@ -31,7 +31,6 @@ print('x_train shape:', x_train.shape, tf.reduce_max(y_train), tf.reduce_min(y_t
 print('x_test shape:', x_test.shape)
 
 
-
 class MyRNN(keras.Model):
 
     def __init__(self, units):
@@ -52,7 +51,6 @@ class MyRNN(keras.Model):
         self.rnn_cell0 = layers.SimpleRNNCell(units, dropout=0.5)
         self.rnn_cell1 = layers.SimpleRNNCell(units, dropout=0.5)
 
-
         # fc, [b, 80, 100] => [b, 64] => [b, 1]
         self.outlayer = layers.Dense(1)
 
@@ -72,7 +70,7 @@ class MyRNN(keras.Model):
         # [b, 80, 100] => [b, 64]
         state0 = self.state0
         state1 = self.state1
-        for word in tf.unstack(x, axis=1): # word: [b, 100]
+        for word in tf.unstack(x, axis=1):  # word: [b, 100]
             # h1 = x*wxh+h0*whh
             # out0: [b, 64]
             out0, state0 = self.rnn_cell0(word, state0, training)
@@ -86,14 +84,15 @@ class MyRNN(keras.Model):
 
         return prob
 
+
 def main():
     units = 64
     epochs = 4
 
     model = MyRNN(units)
-    model.compile(optimizer = keras.optimizers.Adam(0.001),
-                  loss = tf.losses.BinaryCrossentropy(),
-                  metrics=['accuracy'],experimental_run_tf_function=False)
+    model.compile(optimizer=keras.optimizers.Adam(0.001),
+                  loss=tf.losses.BinaryCrossentropy(),
+                  metrics=['accuracy'], experimental_run_tf_function=False)
     model.fit(db_train, epochs=epochs, validation_data=db_test)
 
     model.evaluate(db_test)
