@@ -1,19 +1,19 @@
-import  os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+import os
 
-import  tensorflow as tf
-import  numpy as np
-from    tensorflow import keras
-from    tensorflow.keras import layers
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+import tensorflow as tf
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras import layers
 
 tf.random.set_seed(22)
-np.random.seed(22) 
+np.random.seed(22)
 assert tf.__version__.startswith('2.')
 
 batchsz = 128
 
-# the most frequest words
+# the most request words
 total_words = 10000
 max_review_len = 80
 embedding_len = 100
@@ -29,7 +29,6 @@ db_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 db_test = db_test.batch(batchsz, drop_remainder=True)
 print('x_train shape:', x_train.shape, tf.reduce_max(y_train), tf.reduce_min(y_train))
 print('x_test shape:', x_test.shape)
-
 
 
 class MyRNN(keras.Model):
@@ -54,7 +53,6 @@ class MyRNN(keras.Model):
         self.rnn_cell0 = layers.GRUCell(units, dropout=0.5)
         self.rnn_cell1 = layers.GRUCell(units, dropout=0.5)
 
-
         # fc, [b, 80, 100] => [b, 64] => [b, 1]
         self.outlayer = layers.Dense(1)
 
@@ -74,7 +72,7 @@ class MyRNN(keras.Model):
         # [b, 80, 100] => [b, 64]
         state0 = self.state0
         state1 = self.state1
-        for word in tf.unstack(x, axis=1): # word: [b, 100]
+        for word in tf.unstack(x, axis=1):  # word: [b, 100]
             # h1 = x*wxh+h0*whh
             # out0: [b, 64]
             out0, state0 = self.rnn_cell0(word, state0, training)
@@ -88,6 +86,7 @@ class MyRNN(keras.Model):
 
         return prob
 
+
 def main():
     units = 64
     epochs = 4
@@ -97,8 +96,8 @@ def main():
     t0 = time.time()
 
     model = MyRNN(units)
-    model.compile(optimizer = keras.optimizers.Adam(0.001),
-                  loss = tf.losses.BinaryCrossentropy(),
+    model.compile(optimizer=keras.optimizers.Adam(0.001),
+                  loss=tf.losses.BinaryCrossentropy(),
                   metrics=['accuracy'], experimental_run_tf_function=False)
     model.fit(db_train, epochs=epochs, validation_data=db_test)
 
@@ -107,7 +106,7 @@ def main():
     t1 = time.time()
     # LSTM: 64.3 seconds, 83.4%
     # GRU:  96.7s, 83.4%
-    print('total time cost:', t1-t0)
+    print('total time cost:', t1 - t0)
 
 
 if __name__ == '__main__':
